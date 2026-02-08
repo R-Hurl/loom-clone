@@ -1,0 +1,114 @@
+<div class="home-container">
+  <header class="header">
+    <h1>Loom Clone</h1>
+    <p class="subtitle">Record your screen, camera, and microphone</p>
+  </header>
+
+  <!-- Unsupported Browser Warning -->
+  @if (!isSupported()) {
+    <div class="warning-card" role="alert" aria-live="polite">
+      <div class="warning-icon" aria-hidden="true">⚠️</div>
+      <div class="warning-content">
+        <h2>Browser Not Supported</h2>
+        <p>{{ supportMessage() }}</p>
+        <p class="warning-details">
+          This application requires the File System Access API, which is only
+          available in Chromium-based browsers like Google Chrome, Microsoft
+          Edge, or Opera.
+        </p>
+      </div>
+    </div>
+  } @else {
+    <!-- Main Content - Folder Selection -->
+    <main class="main-content">
+      <!-- Loading State -->
+      @if (isLoading()) {
+        <div class="loading-card" role="status" aria-live="polite">
+          <div class="spinner" aria-hidden="true"></div>
+          <p>Loading folder information...</p>
+        </div>
+      }
+
+      <!-- Error Message -->
+      @if (errorMessage()) {
+        <div class="error-message" role="alert" aria-live="assertive">
+          <span class="error-icon" aria-hidden="true">❌</span>
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <!-- No Folder Selected -->
+      @if (!hasFolder() && !isLoading()) {
+        <div class="card">
+          <div class="card-icon" aria-hidden="true">📁</div>
+          <h2>Select Recording Folder</h2>
+          <p class="card-description">
+            Choose a folder where your recordings will be saved. You'll only
+            need to do this once.
+          </p>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="onSelectFolder()"
+            aria-label="Select a folder for saving recordings"
+          >
+            Select Folder
+          </button>
+        </div>
+      }
+
+      <!-- Folder Selected - Needs Permission -->
+      @if (needsPermission()) {
+        <div class="card card-warning">
+          <div class="card-icon" aria-hidden="true">🔒</div>
+          <h2>Permission Required</h2>
+          <p class="card-description">
+            Grant permission to save recordings to:
+          </p>
+          <p class="folder-name">{{ folderName() }}</p>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="onGrantPermission()"
+            aria-label="Grant permission to access the selected folder"
+          >
+            Grant Permission
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="onChangeFolder()"
+            aria-label="Change to a different folder"
+          >
+            Change Folder
+          </button>
+        </div>
+      }
+
+      <!-- Ready to Record -->
+      @if (isReady()) {
+        <div class="card card-success">
+          <div class="card-icon" aria-hidden="true">✅</div>
+          <h2>Ready to Record</h2>
+          <p class="card-description">Recordings will be saved to:</p>
+          <p class="folder-name">{{ folderName() }}</p>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="onChangeFolder()"
+            aria-label="Change to a different folder"
+          >
+            Change Folder
+          </button>
+          <div class="info-message">
+            <p><strong>Next steps:</strong> Recording features coming soon!</p>
+          </div>
+        </div>
+      }
+    </main>
+  }
+
+  <footer class="footer">
+    <p>Demo application for learning purposes</p>
+  </footer>
+</div>
