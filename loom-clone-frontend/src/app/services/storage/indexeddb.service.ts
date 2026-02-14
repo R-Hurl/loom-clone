@@ -9,8 +9,15 @@ import { Injectable } from '@angular/core';
 })
 export class IndexedDbService {
   private readonly DB_NAME = 'loom-clone-storage';
-  private readonly DB_VERSION = 1;
+  private readonly DB_VERSION = 2;
   private dbPromise: Promise<IDBDatabase> | null = null;
+
+  /**
+   * Check if an object store exists in the current database schema
+   */
+  private hasStore(db: IDBDatabase, storeName: string): boolean {
+    return db.objectStoreNames.contains(storeName);
+  }
 
   /**
    * Initialize and open the IndexedDB database
@@ -41,6 +48,9 @@ export class IndexedDbService {
         if (!db.objectStoreNames.contains('preferences')) {
           db.createObjectStore('preferences');
         }
+        if (!db.objectStoreNames.contains('deviceSelections')) {
+          db.createObjectStore('deviceSelections');
+        }
       };
     });
 
@@ -53,6 +63,11 @@ export class IndexedDbService {
   async get<T>(storeName: string, key: string): Promise<T | undefined> {
     try {
       const db = await this.openDatabase();
+
+      if (!this.hasStore(db, storeName)) {
+        console.warn(`IndexedDB store not found: ${storeName}`);
+        return undefined;
+      }
 
       return new Promise<T | undefined>((resolve, reject) => {
         const transaction = db.transaction(storeName, 'readonly');
@@ -79,6 +94,11 @@ export class IndexedDbService {
   async set<T>(storeName: string, key: string, value: T): Promise<void> {
     const db = await this.openDatabase();
 
+    if (!this.hasStore(db, storeName)) {
+      console.warn(`IndexedDB store not found: ${storeName}`);
+      return;
+    }
+
     return new Promise<void>((resolve, reject) => {
       const transaction = db.transaction(storeName, 'readwrite');
       const store = transaction.objectStore(storeName);
@@ -100,6 +120,11 @@ export class IndexedDbService {
   async delete(storeName: string, key: string): Promise<void> {
     const db = await this.openDatabase();
 
+    if (!this.hasStore(db, storeName)) {
+      console.warn(`IndexedDB store not found: ${storeName}`);
+      return;
+    }
+
     return new Promise<void>((resolve, reject) => {
       const transaction = db.transaction(storeName, 'readwrite');
       const store = transaction.objectStore(storeName);
@@ -120,6 +145,11 @@ export class IndexedDbService {
    */
   async clear(storeName: string): Promise<void> {
     const db = await this.openDatabase();
+
+    if (!this.hasStore(db, storeName)) {
+      console.warn(`IndexedDB store not found: ${storeName}`);
+      return;
+    }
 
     return new Promise<void>((resolve, reject) => {
       const transaction = db.transaction(storeName, 'readwrite');

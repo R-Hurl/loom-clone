@@ -22,8 +22,6 @@
 
 .subtitle {
   font-size: 1.25rem;
-  margin: 0;
-  opacity: 0.95;
 }
 
 .main-content {
@@ -32,7 +30,6 @@
   flex: 1;
 }
 
-/* Cards */
 .card,
 .warning-card,
 .loading-card {
@@ -69,7 +66,6 @@
   border: 3px solid #f59e0b;
 }
 
-/* Folder Name Display */
 .folder-name {
   font-size: 1.25rem;
   font-weight: 600;
@@ -81,7 +77,6 @@
   word-break: break-all;
 }
 
-/* Buttons */
 .btn {
   font-size: 1.1rem;
   padding: 0.875rem 2rem;
@@ -100,11 +95,6 @@
 
 .btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.btn:active {
-  transform: translateY(0);
 }
 
 .btn-primary {
@@ -125,7 +115,6 @@
   background: #d1d5db;
 }
 
-/* Warning Card */
 .warning-card {
   border: 3px solid #ef4444;
   display: flex;
@@ -155,7 +144,6 @@
   margin-top: 1rem !important;
 }
 
-/* Loading Card */
 .loading-card {
   display: flex;
   flex-direction: column;
@@ -178,7 +166,6 @@
   }
 }
 
-/* Messages */
 .error-message {
   background: #fee2e2;
   color: #991b1b;
@@ -210,7 +197,6 @@
   line-height: 1.6;
 }
 
-/* Footer */
 .footer {
   margin-top: 3rem;
   text-align: center;
@@ -223,7 +209,6 @@
   font-size: 0.9rem;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .header h1 {
     font-size: 2rem;
@@ -250,7 +235,6 @@
   }
 }
 
-/* Accessibility - High Contrast Mode */
 @media (prefers-contrast: high) {
   .btn-primary {
     border: 2px solid white;
@@ -262,7 +246,6 @@
   }
 }
 
-/* Accessibility - Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   .btn:hover {
     transform: none;
@@ -271,5 +254,108 @@
   .spinner {
     animation: none;
     border-top-color: transparent;
+  }
+}
+
+.devices-section {
+}
+
+.section-title {
+  font-size: 1.75rem;
+  color: white;
+  margin: 0 0 0.5rem 0;
+  text-align: center;
+}
+
+.section-description {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  margin: 0 0 1.5rem 0;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.toggle-input {
+  accent-color: #667eea;
+  cursor: pointer;
+}
+
+.form-label {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.form-select {
+  width: 100%;
+  padding: 0.875rem;
+  font-size: 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.form-select:hover {
+  border-color: #667eea;
+}
+
+.form-select:focus {
+  outline: 3px solid #667eea;
+  outline-offset: 2px;
+  border-color: #667eea;
+}
+
+.form-select:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.devices-btn {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.success-message {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 2px solid #10b981;
+}
+
+.success-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .success-message,
+  .info-message {
+    border-width: 3px;
   }
 }

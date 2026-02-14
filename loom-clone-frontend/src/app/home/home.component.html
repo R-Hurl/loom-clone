@@ -101,8 +101,167 @@
             Change Folder
           </button>
           <div class="info-message">
-            <p><strong>Next steps:</strong> Recording features coming soon!</p>
+            <p>
+              <strong>Next steps:</strong> Select your recording devices below
+            </p>
           </div>
+        </div>
+
+        <!-- Recording Devices Section -->
+        <div class="devices-section">
+          <h2 class="section-title">Recording Devices</h2>
+          <p class="section-description">
+            Select your camera and microphone for recording
+          </p>
+
+          <!-- Device Loading State -->
+          @if (mediaDevicesEnumerating()) {
+            <div class="loading-card" role="status" aria-live="polite">
+              <div class="spinner" aria-hidden="true"></div>
+              <p>Detecting available devices...</p>
+            </div>
+          }
+
+          <!-- Device Error Message -->
+          @if (mediaDeviceError()) {
+            <div class="error-message" role="alert" aria-live="assertive">
+              <span class="error-icon" aria-hidden="true">❌</span>
+              {{ mediaDeviceError() }}
+            </div>
+          }
+
+          <!-- Device Selection Form -->
+          @if (!mediaDevicesEnumerating()) {
+            <div class="card">
+              <div class="form-group">
+                <label for="camera-select" class="form-label">
+                  📹 Camera
+                </label>
+                <select
+                  id="camera-select"
+                  class="form-select"
+                  (change)="onSelectCamera($event)"
+                  [value]="selectedCameraId() || ''"
+                  aria-label="Select camera device"
+                >
+                  <option value="" disabled>
+                    {{
+                      availableCameras().length === 0
+                        ? "No cameras detected"
+                        : "Choose a camera..."
+                    }}
+                  </option>
+                  @for (camera of availableCameras(); track camera.deviceId) {
+                    <option [value]="camera.deviceId">
+                      {{ camera.label }}
+                    </option>
+                  }
+                </select>
+                <label class="toggle-label" for="camera-toggle">
+                  <input
+                    id="camera-toggle"
+                    type="checkbox"
+                    class="toggle-input"
+                    [checked]="cameraEnabled()"
+                    (change)="onToggleCamera($event)"
+                    aria-label="Enable or disable camera"
+                  />
+                  <span>Camera enabled</span>
+                </label>
+              </div>
+
+              <div class="form-group">
+                <label for="mic-select" class="form-label">
+                  🎤 Microphone
+                </label>
+                <select
+                  id="mic-select"
+                  class="form-select"
+                  (change)="onSelectMicrophone($event)"
+                  [value]="selectedMicrophoneId() || ''"
+                  aria-label="Select microphone device"
+                >
+                  <option value="" disabled>
+                    {{
+                      availableMicrophones().length === 0
+                        ? "No microphones detected"
+                        : "Choose a microphone..."
+                    }}
+                  </option>
+                  @for (mic of availableMicrophones(); track mic.deviceId) {
+                    <option [value]="mic.deviceId">
+                      {{ mic.label }}
+                    </option>
+                  }
+                </select>
+                <label class="toggle-label" for="microphone-toggle">
+                  <input
+                    id="microphone-toggle"
+                    type="checkbox"
+                    class="toggle-input"
+                    [checked]="microphoneEnabled()"
+                    (change)="onToggleMicrophone($event)"
+                    aria-label="Enable or disable microphone"
+                  />
+                  <span>Microphone enabled</span>
+                </label>
+              </div>
+
+              <!-- Permission Request -->
+              @if (needsMediaPermission()) {
+                <button
+                  type="button"
+                  class="btn btn-primary devices-btn"
+                  (click)="onGrantMediaPermission()"
+                  aria-label="Grant camera and microphone permissions"
+                >
+                  Grant Camera & Microphone Access
+                </button>
+              }
+
+              <!-- Ready State -->
+              @if (mediaDeviceReady()) {
+                <div class="success-message">
+                  <span class="success-icon" aria-hidden="true">✓</span>
+                  Devices configured and ready!
+                </div>
+              }
+
+              @if (recordingError()) {
+                <div class="error-message recording-error" role="alert" aria-live="assertive">
+                  <span class="error-icon" aria-hidden="true">❌</span>
+                  {{ recordingError() }}
+                </div>
+              }
+
+              <div class="recording-controls">
+                <p class="recording-status" aria-live="polite">
+                  Recording status: <strong>{{ recordingStatus() }}</strong>
+                </p>
+
+                @if (!isRecording()) {
+                  <button
+                    type="button"
+                    class="btn btn-primary devices-btn"
+                    (click)="onStartRecording()"
+                    [disabled]="!canStartRecording()"
+                    aria-label="Start recording"
+                  >
+                    Start Recording
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="btn btn-secondary devices-btn"
+                    (click)="onStopRecording()"
+                    aria-label="Stop recording"
+                  >
+                    Stop Recording
+                  </button>
+                }
+              </div>
+            </div>
+          }
         </div>
       }
     </main>

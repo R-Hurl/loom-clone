@@ -2,19 +2,27 @@ import { Injectable, computed, signal } from '@angular/core';
 
 /**
  * Service to detect browser compatibility for File System Access API
- * Identifies unsupported browsers (Firefox, Safari) and feature availability
+ * and Media Devices API. Identifies unsupported browsers and feature availability.
  */
 @Injectable({
   providedIn: 'root',
 })
 export class BrowserCompatService {
   private readonly _isSupported = signal<boolean>(this.checkSupport());
+  private readonly _mediaDevicesSupported = signal<boolean>(
+    this.checkMediaDevicesSupport(),
+  );
   private readonly _browserName = signal<string>(this.detectBrowser());
 
   /**
    * Signal indicating if the File System Access API is supported
    */
   readonly isSupported = this._isSupported.asReadonly();
+
+  /**
+   * Signal indicating if the Media Devices API is supported
+   */
+  readonly mediaDevicesSupported = this._mediaDevicesSupported.asReadonly();
 
   /**
    * Signal indicating the detected browser name
@@ -36,6 +44,13 @@ export class BrowserCompatService {
    */
   private checkSupport(): boolean {
     return 'showDirectoryPicker' in window;
+  }
+
+  /**
+   * Check if the Media Devices API is supported in the current browser
+   */
+  private checkMediaDevicesSupport(): boolean {
+    return 'mediaDevices' in navigator;
   }
 
   /**
