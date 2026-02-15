@@ -37,6 +37,7 @@ export interface SelectedMediaDevices {
 export interface MediaTogglePreferences {
   microphoneEnabled: boolean;
   cameraEnabled: boolean;
+  screenSharingEnabled: boolean;
   lastUpdated: number;
 }
 
@@ -62,6 +63,16 @@ export type RecordingStatus =
 export interface ActiveRecordingTracks {
   microphoneTrack: MediaStreamTrack | null;
   cameraTrack: MediaStreamTrack | null;
+}
+
+/**
+ * Recording file summary shown in playback list
+ */
+export interface RecordingFileSummary {
+  name: string;
+  mimeType: string;
+  size: number;
+  lastModified: number;
 }
 
 /**

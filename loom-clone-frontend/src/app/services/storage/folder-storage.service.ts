@@ -6,6 +6,7 @@ import {
   FolderAccessErrorCode,
   PermissionState,
 } from '../../models/storage.models';
+import { RecordingFileSummary } from '../../models/media.models';
 
 /**
  * Service for managing folder selection and File System Access API operations
@@ -26,6 +27,9 @@ export class FolderStorageService {
   private readonly _permissionState = signal<PermissionState>('unknown');
   private readonly _isLoading = signal<boolean>(false);
   private readonly _errorMessage = signal<string | null>(null);
+  private readonly _recordings = signal<RecordingFileSummary[]>([]);
+  private readonly _recordingsLoading = signal<boolean>(false);
+  private readonly _recordingsError = signal<string | null>(null);
 
   // Public readonly signals
   readonly folderHandle = this._folderHandle.asReadonly();
@@ -33,6 +37,9 @@ export class FolderStorageService {
   readonly permissionState = this._permissionState.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
   readonly errorMessage = this._errorMessage.asReadonly();
+  readonly recordings = this._recordings.asReadonly();
+  readonly recordingsLoading = this._recordingsLoading.asReadonly();
+  readonly recordingsError = this._recordingsError.asReadonly();
 
   /**
    * Initialize folder from IndexedDB on app load
@@ -172,8 +179,91 @@ export class FolderStorageService {
       this._folderName.set(null);
       this._permissionState.set('unknown');
       this._errorMessage.set(null);
+      this.clearRecordingsState();
     } catch (error) {
       console.error('Failed to clear stored folder:', error);
+    }
+  }
+
+  /**
+   * Clear recordings list state
+   */
+  clearRecordingsState(): void {
+    this._recordings.set([]);
+    this._recordingsLoading.set(false);
+    this._recordingsError.set(null);
+  }
+
+  /**
+   * Refresh recording file list from selected folder
+   */
+  async refreshRecordings(): Promise<void> {
+    const handle = this._folderHandle();
+    const permission = this._permissionState();
+
+    if (!handle || permission !== 'granted') {
+      this.clearRecordingsState();
+      return;
+    }
+
+    this._recordingsLoading.set(true);
+    this._recordingsError.set(null);
+
+    try {
+      const recordings: RecordingFileSummary[] = [];
+
+      for await (const [name, entry] of handle.entries()) {
+        if (entry.kind !== 'file' || !this.isRecordingFile(name)) {
+          continue;
+        }
+
+        const fileHandle = await handle.getFileHandle(name);
+        const file = await fileHandle.getFile();
+        recordings.push({
+          name,
+          mimeType: file.type,
+          size: file.size,
+          lastModified: file.lastModified,
+        });
+      }
+
+      recordings.sort((a, b) => b.lastModified - a.lastModified);
+      this._recordings.set(recordings);
+    } catch (error) {
+      console.error('Failed to load recordings:', error);
+      this._recordings.set([]);
+      this._recordingsError.set('Unable to load recordings from selected folder');
+    } finally {
+      this._recordingsLoading.set(false);
+    }
+  }
+
+  /**
+   * Read an existing recording file from selected folder
+   */
+  async readRecordingFile(filename: string): Promise<File> {
+    const handle = this._folderHandle();
+    if (!handle) {
+      throw new FolderAccessError(
+        FolderAccessErrorCode.NOT_FOUND,
+        'No folder selected',
+      );
+    }
+
+    const permission = this._permissionState();
+    if (permission !== 'granted') {
+      throw new FolderAccessError(
+        FolderAccessErrorCode.PERMISSION_DENIED,
+        'Permission not granted',
+      );
+    }
+
+    try {
+      const fileHandle = await handle.getFileHandle(filename);
+      return await fileHandle.getFile();
+    } catch (error) {
+      console.error('Failed to read recording file:', error);
+      throw new Error('Recording file could not be read');
     }
   }
 
@@ -252,5 +342,22 @@ export class FolderStorageService {
       console.error('Failed to save recording:', error);
       throw new Error('Failed to save recording to folder');
     }
+  }
+
+  private isRecordingFile(filename: string): boolean {
+    const extension = filename.split('.').pop()?.toLowerCase() ?? '';
+    const supportedExtensions = new Set([
+      'webm',
+      'mp4',
+      'mov',
+      'mkv',
+      'mp3',
+      'wav',
+      'm4a',
+      'ogg',
+      'opus',
+    ]);
+
+    return supportedExtensions.has(extension);
   }
 }

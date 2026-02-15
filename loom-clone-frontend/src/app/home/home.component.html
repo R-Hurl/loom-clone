@@ -134,6 +134,29 @@
           @if (!mediaDevicesEnumerating()) {
             <div class="card">
               <div class="form-group">
+                <label class="form-label" for="screen-sharing-toggle">
+                  🖥️ Screen sharing
+                </label>
+                <label class="toggle-label" for="screen-sharing-toggle">
+                  <input
+                    id="screen-sharing-toggle"
+                    type="checkbox"
+                    class="toggle-input"
+                    [checked]="screenSharingEnabled()"
+                    (change)="onToggleScreenSharing($event)"
+                    aria-label="Enable or disable screen sharing mode"
+                  />
+                  <span>Record screen or window</span>
+                </label>
+                @if (screenSharingEnabled()) {
+                  <p class="field-note">
+                    Starting recording will open the browser picker so you can
+                    choose a screen or window.
+                  </p>
+                }
+              </div>
+
+              <div class="form-group">
                 <label for="camera-select" class="form-label">
                   📹 Camera
                 </label>
@@ -151,7 +174,10 @@
                         : "Choose a camera..."
                     }}
                   </option>
-                  @for (camera of availableCameras(); track camera.selectionKey) {
+                  @for (
+                    camera of availableCameras();
+                    track camera.selectionKey
+                  ) {
                     <option [value]="camera.selectionKey">
                       {{ camera.label }}
                     </option>
@@ -223,14 +249,28 @@
               @if (mediaDeviceReady()) {
                 <div class="success-message">
                   <span class="success-icon" aria-hidden="true">✓</span>
-                  Devices configured and ready!
+                  @if (hasEnabledInput()) {
+                    Devices configured and ready!
+                  } @else {
+                    No camera or microphone selected for this recording.
+                  }
                 </div>
               }
 
               @if (recordingError()) {
-                <div class="error-message recording-error" role="alert" aria-live="assertive">
+                <div
+                  class="error-message recording-error"
+                  role="alert"
+                  aria-live="assertive"
+                >
                   <span class="error-icon" aria-hidden="true">❌</span>
                   {{ recordingError() }}
+                </div>
+              }
+
+              @if (recordingStatusMessage()) {
+                <div class="info-message" role="status" aria-live="polite">
+                  <p>{{ recordingStatusMessage() }}</p>
                 </div>
               }
 
@@ -238,6 +278,13 @@
                 <p class="recording-status" aria-live="polite">
                   Recording status: <strong>{{ recordingStatus() }}</strong>
                 </p>
+
+                @if (screenSharingEnabled() && cameraEnabled()) {
+                  <p class="field-note">
+                    Camera is ignored while screen sharing is enabled in this
+                    MVP build.
+                  </p>
+                }
 
                 @if (!isRecording()) {
                   <button
@@ -260,6 +307,96 @@
                   </button>
                 }
               </div>
+            </div>
+          }
+        </div>
+
+        <div class="recordings-section">
+          <h2 class="section-title">Previous Recordings</h2>
+          <p class="section-description">
+            Click a recording below to play it back
+          </p>
+
+          @if (recordingsLoading()) {
+            <div class="loading-card" role="status" aria-live="polite">
+              <div class="spinner" aria-hidden="true"></div>
+              <p>Loading recordings...</p>
+            </div>
+          }
+
+          @if (recordingsError()) {
+            <div class="error-message" role="alert" aria-live="assertive">
+              <span class="error-icon" aria-hidden="true">❌</span>
+              {{ recordingsError() }}
+            </div>
+          }
+
+          @if (!recordingsLoading() && !recordingsError()) {
+            <div class="card recordings-card">
+              @if (hasRecordings()) {
+                <ul class="recordings-list" aria-label="Saved recordings">
+                  @for (recording of recordings(); track recording.name) {
+                    <li>
+                      <button
+                        type="button"
+                        class="recording-item"
+                        [class.recording-item-active]="
+                          selectedRecording()?.name === recording.name
+                        "
+                        (click)="onPlayRecording(recording)"
+                        [attr.aria-label]="'Play recording ' + recording.name"
+                      >
+                        <span class="recording-name">{{ recording.name }}</span>
+                        <span class="recording-meta">
+                          {{ formatTimestamp(recording.lastModified) }} ·
+                          {{ formatFileSize(recording.size) }}
+                        </span>
+                      </button>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <p class="card-description recordings-empty">
+                  No recordings found in this folder yet.
+                </p>
+              }
+            </div>
+          }
+
+          @if (playbackError()) {
+            <div class="error-message" role="alert" aria-live="assertive">
+              <span class="error-icon" aria-hidden="true">❌</span>
+              {{ playbackError() }}
+            </div>
+          }
+
+          @if (playbackLoading()) {
+            <div class="loading-card" role="status" aria-live="polite">
+              <div class="spinner" aria-hidden="true"></div>
+              <p>Preparing playback...</p>
+            </div>
+          }
+
+          @if (playbackUrl() && selectedRecording()) {
+            <div class="card recordings-player-card">
+              <h3 class="playback-title">Now Playing</h3>
+              <p class="playback-name">{{ selectedRecording()!.name }}</p>
+
+              @if (isAudioPlayback()) {
+                <audio
+                  controls
+                  [src]="playbackUrl()"
+                  class="playback-media"
+                  aria-label="Audio playback"
+                ></audio>
+              } @else {
+                <video
+                  controls
+                  [src]="playbackUrl()"
+                  class="playback-media"
+                  aria-label="Video playback"
+                ></video>
+              }
             </div>
           }
         </div>

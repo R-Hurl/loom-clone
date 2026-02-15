@@ -38,6 +38,7 @@ export class MediaDevicesService {
   private readonly _errorMessage = signal<string | null>(null);
   private readonly _microphoneEnabled = signal(true);
   private readonly _cameraEnabled = signal(false);
+  private readonly _screenSharingEnabled = signal(true);
   private readonly _activeMicrophoneTrack = signal<MediaStreamTrack | null>(
     null,
   );
@@ -54,6 +55,7 @@ export class MediaDevicesService {
   readonly errorMessage = this._errorMessage.asReadonly();
   readonly microphoneEnabled = this._microphoneEnabled.asReadonly();
   readonly cameraEnabled = this._cameraEnabled.asReadonly();
+  readonly screenSharingEnabled = this._screenSharingEnabled.asReadonly();
 
   // ============ Computed Signals ============
 
@@ -252,6 +254,15 @@ export class MediaDevicesService {
   }
 
   /**
+   * Toggle screen sharing mode for recording sessions
+   */
+  async setScreenSharingEnabled(enabled: boolean): Promise<void> {
+    this._screenSharingEnabled.set(enabled);
+    this._errorMessage.set(null);
+    await this.saveTogglePreferences();
+  }
+
+  /**
    * Attach active microphone/camera tracks for live toggle control
    */
   attachActiveTracks(tracks: ActiveRecordingTracks): void {
@@ -365,6 +376,7 @@ export class MediaDevicesService {
       const preferences: MediaTogglePreferences = {
         microphoneEnabled: this._microphoneEnabled(),
         cameraEnabled: this._cameraEnabled(),
+        screenSharingEnabled: this._screenSharingEnabled(),
         lastUpdated: Date.now(),
       };
 
@@ -456,8 +468,15 @@ export class MediaDevicesService {
       );
 
       if (preferences) {
+        const preferencesWithDefaults =
+          preferences as MediaTogglePreferences & {
+            screenSharingEnabled?: boolean;
+          };
         this._microphoneEnabled.set(preferences.microphoneEnabled);
         this._cameraEnabled.set(preferences.cameraEnabled);
+        this._screenSharingEnabled.set(
+          preferencesWithDefaults.screenSharingEnabled ?? true,
+        );
       }
     } catch (error) {
       console.error(
@@ -579,6 +598,7 @@ export class MediaDevicesService {
     this._selectedMicrophoneKey.set(null);
     this._microphoneEnabled.set(true);
     this._cameraEnabled.set(false);
+    this._screenSharingEnabled.set(true);
     this.clearActiveTracks();
     this._permissionState.set('unknown');
     this._errorMessage.set(null);

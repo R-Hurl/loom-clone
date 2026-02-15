@@ -12,9 +12,11 @@ export class RecordingSessionService {
 
   private readonly _recordingStatus = signal<RecordingStatus>('idle');
   private readonly _errorMessage = signal<string | null>(null);
+  private readonly _statusMessage = signal<string | null>(null);
 
   readonly recordingStatus = this._recordingStatus.asReadonly();
   readonly errorMessage = this._errorMessage.asReadonly();
+  readonly statusMessage = this._statusMessage.asReadonly();
 
   readonly isRecording = computed(
     () => this._recordingStatus() === 'recording',
@@ -33,27 +35,58 @@ export class RecordingSessionService {
 
     this._recordingStatus.set('starting');
     this._errorMessage.set(null);
+    this._statusMessage.set(null);
 
     try {
-      this.screenStream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-        audio: false,
-      });
+      const screenSharingEnabled = this.mediaDevices.screenSharingEnabled();
+      const cameraEnabled = this.mediaDevices.cameraEnabled();
+      const microphoneEnabled = this.mediaDevices.microphoneEnabled();
+      const selectedCamera = this.mediaDevices.selectedCamera();
+      const selectedMicrophone = this.mediaDevices.selectedMicrophone();
+
+      const captureScreen = screenSharingEnabled;
+      const captureCamera =
+        !screenSharingEnabled && cameraEnabled && selectedCamera !== null;
+      const captureMicrophone =
+        microphoneEnabled && selectedMicrophone !== null;
+
+      if (!captureScreen && !captureCamera && !captureMicrophone) {
+        throw new Error('Enable screen sharing, camera, or microphone first');
+      }
+
+      if (captureScreen) {
+        try {
+          this.screenStream = await navigator.mediaDevices.getDisplayMedia({
+            video: true,
+            audio: false,
+          });
+        } catch (error) {
+          if (this.isScreenSelectionCanceled(error)) {
+            this._recordingStatus.set('idle');
+            this._statusMessage.set('Screen sharing selection was canceled');
+            return;
+          }
+
+          throw error;
+        }
+      }
 
       this.recordingStream = new MediaStream();
-      const screenVideoTrack = this.screenStream.getVideoTracks()[0] ?? null;
-      if (!screenVideoTrack) {
-        throw new Error('Screen video track is unavailable');
+      const screenVideoTrack = this.screenStream?.getVideoTracks()[0] ?? null;
+
+      if (screenVideoTrack) {
+        this.recordingStream.addTrack(screenVideoTrack);
+        screenVideoTrack.onended = () => {
+          if (this._recordingStatus() === 'recording') {
+            void this.stopRecording();
+          }
+        };
       }
-      this.recordingStream.addTrack(screenVideoTrack);
 
-      screenVideoTrack.onended = () => {
-        if (this._recordingStatus() === 'recording') {
-          void this.stopRecording();
-        }
-      };
-
-      const mediaConstraints = this.buildDeviceConstraints();
+      const mediaConstraints = this.buildDeviceConstraints({
+        includeCamera: captureCamera,
+        includeMicrophone: captureMicrophone,
+      });
       if (
         mediaConstraints.video !== false ||
         mediaConstraints.audio !== false
@@ -64,6 +97,18 @@ export class RecordingSessionService {
 
       const microphoneTrack = this.deviceStream?.getAudioTracks()[0] ?? null;
       const cameraTrack = this.deviceStream?.getVideoTracks()[0] ?? null;
+
+      if (!screenVideoTrack && cameraTrack) {
+        this.recordingStream.addTrack(cameraTrack);
+      }
+
+      if (
+        !screenVideoTrack &&
+        !cameraTrack &&
+        (captureScreen || captureCamera)
+      ) {
+        throw new Error('Video track is unavailable for recording');
+      }
 
       if (microphoneTrack) {
         this.recordingStream.addTrack(microphoneTrack);
@@ -115,6 +160,7 @@ export class RecordingSessionService {
       if (finalBlob.size > 0) {
         const filename = this.createFilename();
         await this.folderStorage.saveRecording(finalBlob, filename);
+        await this.folderStorage.refreshRecordings();
       }
 
       this._recordingStatus.set('idle');
@@ -134,16 +180,20 @@ export class RecordingSessionService {
       this._recordingStatus.set('idle');
     }
     this._errorMessage.set(null);
+    this._statusMessage.set(null);
   }
 
-  private buildDeviceConstraints(): MediaStreamConstraints {
+  private buildDeviceConstraints(options: {
+    includeCamera: boolean;
+    includeMicrophone: boolean;
+  }): MediaStreamConstraints {
     const selectedCamera = this.mediaDevices.selectedCamera();
     const selectedMicrophone = this.mediaDevices.selectedMicrophone();
     const selectedCameraId = selectedCamera?.deviceId.trim() || null;
     const selectedMicrophoneId = selectedMicrophone?.deviceId.trim() || null;
 
     let videoConstraints: MediaTrackConstraints | boolean = false;
-    if (selectedCamera !== null) {
+    if (options.includeCamera && selectedCamera !== null) {
       if (selectedCameraId) {
         videoConstraints = { deviceId: { exact: selectedCameraId } };
       } else {
@@ -152,7 +202,7 @@ export class RecordingSessionService {
     }
 
     let audioConstraints: MediaTrackConstraints | boolean = false;
-    if (selectedMicrophone !== null) {
+    if (options.includeMicrophone && selectedMicrophone !== null) {
       if (selectedMicrophoneId) {
         audioConstraints = { deviceId: { exact: selectedMicrophoneId } };
       } else {
@@ -208,6 +258,13 @@ export class RecordingSessionService {
     const now = new Date();
     const iso = now.toISOString().replace(/[:.]/g, '-');
     return `recording-${iso}.webm`;
+  }
+
+  private isScreenSelectionCanceled(error: unknown): boolean {
+    return (
+      error instanceof DOMException &&
+      (error.name === 'NotAllowedError' || error.name === 'AbortError')
+    );
   }
 
   private cleanupSession(): void {
