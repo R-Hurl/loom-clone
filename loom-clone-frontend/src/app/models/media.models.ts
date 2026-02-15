@@ -12,6 +12,7 @@ export type MediaDeviceKind = 'videoinput' | 'audioinput';
  * Represents a camera or microphone device available on the system
  */
 export interface MediaInputDevice {
+  selectionKey: string;
   deviceId: string;
   label: string;
   kind: MediaDeviceKind;
@@ -24,8 +25,8 @@ export interface MediaInputDevice {
  */
 export interface SelectedMediaDevices {
   id: 'current';
-  cameraDeviceId: string | null;
-  microphoneDeviceId: string | null;
+  cameraSelectionKey: string | null;
+  microphoneSelectionKey: string | null;
   lastSelected: number;
 }
 

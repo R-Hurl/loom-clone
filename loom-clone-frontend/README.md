@@ -79,6 +79,18 @@ ng build
 
 The build artifacts will be stored in the `dist/` directory.
 
+## Manual QA Checklist (macOS Default Devices)
+
+Use this checklist when testing on macOS in a Chromium browser where camera or microphone `deviceId` may be empty before permissions are granted.
+
+- [ ] Open the app and select a recording folder.
+- [ ] In **Recording Devices**, select the available camera and microphone.
+- [ ] Refresh the page and confirm both selections are restored.
+- [ ] Click **Grant Camera & Microphone Access** and allow permission.
+- [ ] Confirm no error appears about invalid or missing device IDs.
+- [ ] Start recording, then stop recording.
+- [ ] Verify the recording is saved to the selected folder.
+
 ## Project Structure
 
 ```

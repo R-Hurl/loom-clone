@@ -141,7 +141,7 @@
                   id="camera-select"
                   class="form-select"
                   (change)="onSelectCamera($event)"
-                  [value]="selectedCameraId() || ''"
+                  [value]="selectedCameraKey() || ''"
                   aria-label="Select camera device"
                 >
                   <option value="" disabled>
@@ -151,8 +151,8 @@
                         : "Choose a camera..."
                     }}
                   </option>
-                  @for (camera of availableCameras(); track camera.deviceId) {
-                    <option [value]="camera.deviceId">
+                  @for (camera of availableCameras(); track camera.selectionKey) {
+                    <option [value]="camera.selectionKey">
                       {{ camera.label }}
                     </option>
                   }
@@ -178,7 +178,7 @@
                   id="mic-select"
                   class="form-select"
                   (change)="onSelectMicrophone($event)"
-                  [value]="selectedMicrophoneId() || ''"
+                  [value]="selectedMicrophoneKey() || ''"
                   aria-label="Select microphone device"
                 >
                   <option value="" disabled>
@@ -188,8 +188,8 @@
                         : "Choose a microphone..."
                     }}
                   </option>
-                  @for (mic of availableMicrophones(); track mic.deviceId) {
-                    <option [value]="mic.deviceId">
+                  @for (mic of availableMicrophones(); track mic.selectionKey) {
+                    <option [value]="mic.selectionKey">
                       {{ mic.label }}
                     </option>
                   }

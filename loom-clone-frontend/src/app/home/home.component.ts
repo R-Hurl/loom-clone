@@ -47,8 +47,8 @@ export class HomeComponent implements OnInit {
   // ============ Media Device Selection Signals ============
   readonly availableCameras = this.mediaDevices.availableCameras;
   readonly availableMicrophones = this.mediaDevices.availableMicrophones;
-  readonly selectedCameraId = this.mediaDevices.selectedCameraId;
-  readonly selectedMicrophoneId = this.mediaDevices.selectedMicrophoneId;
+  readonly selectedCameraKey = this.mediaDevices.selectedCameraKey;
+  readonly selectedMicrophoneKey = this.mediaDevices.selectedMicrophoneKey;
   readonly mediaDevicesEnumerating = this.mediaDevices.isEnumerating;
   readonly mediaDeviceError = this.mediaDevices.errorMessage;
   readonly mediaDevicePermissionState = this.mediaDevices.permissionState;
@@ -62,7 +62,7 @@ export class HomeComponent implements OnInit {
   // Computed signals for media device UI state
   readonly hasDeviceSelection = computed(
     () =>
-      this.selectedCameraId() !== null || this.selectedMicrophoneId() !== null,
+      this.selectedCameraKey() !== null || this.selectedMicrophoneKey() !== null,
   );
   readonly needsMediaPermission = computed(
     () =>
@@ -120,10 +120,12 @@ export class HomeComponent implements OnInit {
    */
   async onSelectCamera(event: Event): Promise<void> {
     const target = event.target as HTMLSelectElement;
-    if (target.value) {
-      this.mediaDevices.selectCamera(target.value);
-      await this.mediaDevices.saveDeviceSelection();
+    if (target.value === '') {
+      return;
     }
+
+    this.mediaDevices.selectCamera(target.value);
+    await this.mediaDevices.saveDeviceSelection();
   }
 
   /**
@@ -131,10 +133,12 @@ export class HomeComponent implements OnInit {
    */
   async onSelectMicrophone(event: Event): Promise<void> {
     const target = event.target as HTMLSelectElement;
-    if (target.value) {
-      this.mediaDevices.selectMicrophone(target.value);
-      await this.mediaDevices.saveDeviceSelection();
+    if (target.value === '') {
+      return;
     }
+
+    this.mediaDevices.selectMicrophone(target.value);
+    await this.mediaDevices.saveDeviceSelection();
   }
 
   /**

@@ -137,18 +137,32 @@ export class RecordingSessionService {
   }
 
   private buildDeviceConstraints(): MediaStreamConstraints {
-    const selectedCameraId = this.mediaDevices.selectedCameraId();
-    const selectedMicrophoneId = this.mediaDevices.selectedMicrophoneId();
+    const selectedCamera = this.mediaDevices.selectedCamera();
+    const selectedMicrophone = this.mediaDevices.selectedMicrophone();
+    const selectedCameraId = selectedCamera?.deviceId.trim() || null;
+    const selectedMicrophoneId = selectedMicrophone?.deviceId.trim() || null;
+
+    let videoConstraints: MediaTrackConstraints | boolean = false;
+    if (selectedCamera !== null) {
+      if (selectedCameraId) {
+        videoConstraints = { deviceId: { exact: selectedCameraId } };
+      } else {
+        videoConstraints = true;
+      }
+    }
+
+    let audioConstraints: MediaTrackConstraints | boolean = false;
+    if (selectedMicrophone !== null) {
+      if (selectedMicrophoneId) {
+        audioConstraints = { deviceId: { exact: selectedMicrophoneId } };
+      } else {
+        audioConstraints = true;
+      }
+    }
 
     return {
-      video:
-        selectedCameraId !== null
-          ? { deviceId: { exact: selectedCameraId } }
-          : false,
-      audio:
-        selectedMicrophoneId !== null
-          ? { deviceId: { exact: selectedMicrophoneId } }
-          : false,
+      video: videoConstraints,
+      audio: audioConstraints,
     };
   }
 
