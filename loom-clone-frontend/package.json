@@ -10,7 +10,8 @@
     "lint": "ng lint",
     "lint:fix": "ng lint --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "quality:changed:ts": "node ./scripts/quality-changed.mjs"
   },
   "private": true,
   "dependencies": {
