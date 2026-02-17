@@ -12,9 +12,8 @@
         <h2>Browser Not Supported</h2>
         <p>{{ supportMessage() }}</p>
         <p class="warning-details">
-          This application requires the File System Access API, which is only
-          available in Chromium-based browsers like Google Chrome, Microsoft
-          Edge, or Opera.
+          This application requires the File System Access API, which is only available in
+          Chromium-based browsers like Google Chrome, Microsoft Edge, or Opera.
         </p>
       </div>
     </div>
@@ -43,8 +42,7 @@
           <div class="card-icon" aria-hidden="true">📁</div>
           <h2>Select Recording Folder</h2>
           <p class="card-description">
-            Choose a folder where your recordings will be saved. You'll only
-            need to do this once.
+            Choose a folder where your recordings will be saved. You'll only need to do this once.
           </p>
           <button
             type="button"
@@ -62,9 +60,7 @@
         <div class="card card-warning">
           <div class="card-icon" aria-hidden="true">🔒</div>
           <h2>Permission Required</h2>
-          <p class="card-description">
-            Grant permission to save recordings to:
-          </p>
+          <p class="card-description">Grant permission to save recordings to:</p>
           <p class="folder-name">{{ folderName() }}</p>
           <button
             type="button"
@@ -101,18 +97,14 @@
             Change Folder
           </button>
           <div class="info-message">
-            <p>
-              <strong>Next steps:</strong> Select your recording devices below
-            </p>
+            <p><strong>Next steps:</strong> Select your recording devices below</p>
           </div>
         </div>
 
         <!-- Recording Devices Section -->
         <div class="devices-section">
           <h2 class="section-title">Recording Devices</h2>
-          <p class="section-description">
-            Select your camera and microphone for recording
-          </p>
+          <p class="section-description">Select your camera and microphone for recording</p>
 
           <!-- Device Loading State -->
           @if (mediaDevicesEnumerating()) {
@@ -134,9 +126,7 @@
           @if (!mediaDevicesEnumerating()) {
             <div class="card">
               <div class="form-group">
-                <label class="form-label" for="screen-sharing-toggle">
-                  🖥️ Screen sharing
-                </label>
+                <label class="form-label" for="screen-sharing-toggle"> 🖥️ Screen sharing </label>
                 <label class="toggle-label" for="screen-sharing-toggle">
                   <input
                     id="screen-sharing-toggle"
@@ -150,16 +140,14 @@
                 </label>
                 @if (screenSharingEnabled()) {
                   <p class="field-note">
-                    Starting recording will open the browser picker so you can
-                    choose a screen or window.
+                    Starting recording will open the browser picker so you can choose a screen or
+                    window.
                   </p>
                 }
               </div>
 
               <div class="form-group">
-                <label for="camera-select" class="form-label">
-                  📹 Camera
-                </label>
+                <label for="camera-select" class="form-label"> 📹 Camera </label>
                 <select
                   id="camera-select"
                   class="form-select"
@@ -169,15 +157,10 @@
                 >
                   <option value="" disabled>
                     {{
-                      availableCameras().length === 0
-                        ? "No cameras detected"
-                        : "Choose a camera..."
+                      availableCameras().length === 0 ? 'No cameras detected' : 'Choose a camera...'
                     }}
                   </option>
-                  @for (
-                    camera of availableCameras();
-                    track camera.selectionKey
-                  ) {
+                  @for (camera of availableCameras(); track camera.selectionKey) {
                     <option [value]="camera.selectionKey">
                       {{ camera.label }}
                     </option>
@@ -197,9 +180,7 @@
               </div>
 
               <div class="form-group">
-                <label for="mic-select" class="form-label">
-                  🎤 Microphone
-                </label>
+                <label for="mic-select" class="form-label"> 🎤 Microphone </label>
                 <select
                   id="mic-select"
                   class="form-select"
@@ -210,8 +191,8 @@
                   <option value="" disabled>
                     {{
                       availableMicrophones().length === 0
-                        ? "No microphones detected"
-                        : "Choose a microphone..."
+                        ? 'No microphones detected'
+                        : 'Choose a microphone...'
                     }}
                   </option>
                   @for (mic of availableMicrophones(); track mic.selectionKey) {
@@ -258,11 +239,7 @@
               }
 
               @if (recordingError()) {
-                <div
-                  class="error-message recording-error"
-                  role="alert"
-                  aria-live="assertive"
-                >
+                <div class="error-message recording-error" role="alert" aria-live="assertive">
                   <span class="error-icon" aria-hidden="true">❌</span>
                   {{ recordingError() }}
                 </div>
@@ -281,8 +258,7 @@
 
                 @if (screenSharingEnabled() && cameraEnabled()) {
                   <p class="field-note">
-                    Camera is ignored while screen sharing is enabled in this
-                    MVP build.
+                    Camera is ignored while screen sharing is enabled in this MVP build.
                   </p>
                 }
 
@@ -313,9 +289,7 @@
 
         <div class="recordings-section">
           <h2 class="section-title">Previous Recordings</h2>
-          <p class="section-description">
-            Click a recording below to play it back
-          </p>
+          <p class="section-description">Click a recording below to play it back</p>
 
           @if (recordingsLoading()) {
             <div class="loading-card" role="status" aria-live="polite">
@@ -340,9 +314,7 @@
                       <button
                         type="button"
                         class="recording-item"
-                        [class.recording-item-active]="
-                          selectedRecording()?.name === recording.name
-                        "
+                        [class.recording-item-active]="selectedRecording()?.name === recording.name"
                         (click)="onPlayRecording(recording)"
                         [attr.aria-label]="'Play recording ' + recording.name"
                       >

@@ -63,6 +63,32 @@ Navigate to `http://localhost:4200/` in a supported browser (Chrome, Edge, or Op
 
 The application will automatically reload if you change any of the source files.
 
+## Linting & Formatting
+
+Run ESLint:
+
+```bash
+npm run lint
+```
+
+Run ESLint with auto-fixes:
+
+```bash
+npm run lint:fix
+```
+
+Format all files with Prettier:
+
+```bash
+npm run format
+```
+
+Check formatting without writing changes:
+
+```bash
+npm run format:check
+```
+
 ## Build
 
 Build the project for production:

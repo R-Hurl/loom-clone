@@ -50,12 +50,7 @@ export type MediaPermissionState = 'granted' | 'prompt' | 'denied' | 'unknown';
 /**
  * High-level recording runtime status
  */
-export type RecordingStatus =
-  | 'idle'
-  | 'starting'
-  | 'recording'
-  | 'stopping'
-  | 'error';
+export type RecordingStatus = 'idle' | 'starting' | 'recording' | 'stopping' | 'error';
 
 /**
  * Active media tracks used during recording session

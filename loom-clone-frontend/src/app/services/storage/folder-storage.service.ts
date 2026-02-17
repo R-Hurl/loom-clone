@@ -20,9 +20,7 @@ export class FolderStorageService {
   private readonly STORAGE_KEY = 'recordings-folder';
 
   // State signals
-  private readonly _folderHandle = signal<FileSystemDirectoryHandle | null>(
-    null,
-  );
+  private readonly _folderHandle = signal<FileSystemDirectoryHandle | null>(null);
   private readonly _folderName = signal<string | null>(null);
   private readonly _permissionState = signal<PermissionState>('unknown');
   private readonly _isLoading = signal<boolean>(false);
@@ -50,10 +48,7 @@ export class FolderStorageService {
     this._errorMessage.set(null);
 
     try {
-      const storedData = await this.indexedDb.get<StoredFolderData>(
-        'handles',
-        this.STORAGE_KEY,
-      );
+      const storedData = await this.indexedDb.get<StoredFolderData>('handles', this.STORAGE_KEY);
 
       if (!storedData || !storedData.handle) {
         this._isLoading.set(false);
@@ -65,9 +60,7 @@ export class FolderStorageService {
       if (!isValid) {
         // Clear invalid handle immediately
         await this.clearStoredFolder();
-        this._errorMessage.set(
-          'Previously selected folder is no longer accessible',
-        );
+        this._errorMessage.set('Previously selected folder is no longer accessible');
         this._isLoading.set(false);
         return;
       }
@@ -244,10 +237,7 @@ export class FolderStorageService {
   async readRecordingFile(filename: string): Promise<File> {
     const handle = this._folderHandle();
     if (!handle) {
-      throw new FolderAccessError(
-        FolderAccessErrorCode.NOT_FOUND,
-        'No folder selected',
-      );
+      throw new FolderAccessError(FolderAccessErrorCode.NOT_FOUND, 'No folder selected');
     }
 
     const permission = this._permissionState();
@@ -270,9 +260,7 @@ export class FolderStorageService {
   /**
    * Save folder handle to IndexedDB
    */
-  private async saveFolderData(
-    handle: FileSystemDirectoryHandle,
-  ): Promise<void> {
+  private async saveFolderData(handle: FileSystemDirectoryHandle): Promise<void> {
     const folderData: StoredFolderData = {
       handle,
       lastAccessed: new Date(),
@@ -285,9 +273,7 @@ export class FolderStorageService {
   /**
    * Verify that a folder handle is still valid
    */
-  private async verifyHandle(
-    handle: FileSystemDirectoryHandle,
-  ): Promise<boolean> {
+  private async verifyHandle(handle: FileSystemDirectoryHandle): Promise<boolean> {
     try {
       // Try to iterate the directory to check if it still exists
       const entries = handle.entries();
@@ -301,9 +287,7 @@ export class FolderStorageService {
   /**
    * Check permission state for a folder handle
    */
-  private async checkPermission(
-    handle: FileSystemDirectoryHandle,
-  ): Promise<PermissionState> {
+  private async checkPermission(handle: FileSystemDirectoryHandle): Promise<PermissionState> {
     try {
       const permission = await handle.queryPermission({ mode: 'readwrite' });
       return permission;
@@ -319,10 +303,7 @@ export class FolderStorageService {
   async saveRecording(blob: Blob, filename: string): Promise<void> {
     const handle = this._folderHandle();
     if (!handle) {
-      throw new FolderAccessError(
-        FolderAccessErrorCode.NOT_FOUND,
-        'No folder selected',
-      );
+      throw new FolderAccessError(FolderAccessErrorCode.NOT_FOUND, 'No folder selected');
     }
 
     const permission = this._permissionState();

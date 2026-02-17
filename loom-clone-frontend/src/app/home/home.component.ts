@@ -43,9 +43,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly needsPermission = computed(
     () => this.hasFolder() && this.permissionState() === 'prompt',
   );
-  readonly isReady = computed(
-    () => this.hasFolder() && this.permissionState() === 'granted',
-  );
+  readonly isReady = computed(() => this.hasFolder() && this.permissionState() === 'granted');
 
   // ============ Media Device Selection Signals ============
   readonly availableCameras = this.mediaDevices.availableCameras;
@@ -69,9 +67,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly recordingsLoading = this.folderStorage.recordingsLoading;
   readonly recordingsError = this.folderStorage.recordingsError;
 
-  private readonly _selectedRecording = signal<RecordingFileSummary | null>(
-    null,
-  );
+  private readonly _selectedRecording = signal<RecordingFileSummary | null>(null);
   private readonly _playbackUrl = signal<string | null>(null);
   private readonly _playbackError = signal<string | null>(null);
   private readonly _playbackLoading = signal<boolean>(false);
@@ -83,18 +79,13 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   // Computed signals for media device UI state
   readonly hasDeviceSelection = computed(
-    () =>
-      this.selectedCameraKey() !== null ||
-      this.selectedMicrophoneKey() !== null,
+    () => this.selectedCameraKey() !== null || this.selectedMicrophoneKey() !== null,
   );
   readonly needsMediaPermission = computed(
-    () =>
-      this.hasEnabledInput() && this.mediaDevicePermissionState() !== 'granted',
+    () => this.hasEnabledInput() && this.mediaDevicePermissionState() !== 'granted',
   );
   readonly mediaDeviceReady = computed(
-    () =>
-      !this.hasEnabledInput() ||
-      this.mediaDevicePermissionState() === 'granted',
+    () => !this.hasEnabledInput() || this.mediaDevicePermissionState() === 'granted',
   );
 
   readonly hasRecordingSource = computed(
@@ -254,9 +245,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       });
     } catch (error) {
       this._selectedRecording.set(null);
-      this._playbackError.set(
-        error instanceof Error ? error.message : 'Unable to play recording',
-      );
+      this._playbackError.set(error instanceof Error ? error.message : 'Unable to play recording');
       await this.folderStorage.refreshRecordings();
     } finally {
       this._playbackLoading.set(false);

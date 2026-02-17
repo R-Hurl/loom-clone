@@ -18,9 +18,7 @@ export class RecordingSessionService {
   readonly errorMessage = this._errorMessage.asReadonly();
   readonly statusMessage = this._statusMessage.asReadonly();
 
-  readonly isRecording = computed(
-    () => this._recordingStatus() === 'recording',
-  );
+  readonly isRecording = computed(() => this._recordingStatus() === 'recording');
 
   private screenStream: MediaStream | null = null;
   private deviceStream: MediaStream | null = null;
@@ -45,10 +43,8 @@ export class RecordingSessionService {
       const selectedMicrophone = this.mediaDevices.selectedMicrophone();
 
       const captureScreen = screenSharingEnabled;
-      const captureCamera =
-        !screenSharingEnabled && cameraEnabled && selectedCamera !== null;
-      const captureMicrophone =
-        microphoneEnabled && selectedMicrophone !== null;
+      const captureCamera = !screenSharingEnabled && cameraEnabled && selectedCamera !== null;
+      const captureMicrophone = microphoneEnabled && selectedMicrophone !== null;
 
       if (!captureScreen && !captureCamera && !captureMicrophone) {
         throw new Error('Enable screen sharing, camera, or microphone first');
@@ -87,12 +83,8 @@ export class RecordingSessionService {
         includeCamera: captureCamera,
         includeMicrophone: captureMicrophone,
       });
-      if (
-        mediaConstraints.video !== false ||
-        mediaConstraints.audio !== false
-      ) {
-        this.deviceStream =
-          await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      if (mediaConstraints.video !== false || mediaConstraints.audio !== false) {
+        this.deviceStream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
       }
 
       const microphoneTrack = this.deviceStream?.getAudioTracks()[0] ?? null;
@@ -102,11 +94,7 @@ export class RecordingSessionService {
         this.recordingStream.addTrack(cameraTrack);
       }
 
-      if (
-        !screenVideoTrack &&
-        !cameraTrack &&
-        (captureScreen || captureCamera)
-      ) {
+      if (!screenVideoTrack && !cameraTrack && (captureScreen || captureCamera)) {
         throw new Error('Video track is unavailable for recording');
       }
 
@@ -141,9 +129,7 @@ export class RecordingSessionService {
     } catch (error) {
       this.cleanupSession();
       this._recordingStatus.set('error');
-      this._errorMessage.set(
-        error instanceof Error ? error.message : 'Unable to start recording',
-      );
+      this._errorMessage.set(error instanceof Error ? error.message : 'Unable to start recording');
     }
   }
 
@@ -167,9 +153,7 @@ export class RecordingSessionService {
       this._errorMessage.set(null);
     } catch (error) {
       this._recordingStatus.set('error');
-      this._errorMessage.set(
-        error instanceof Error ? error.message : 'Unable to stop recording',
-      );
+      this._errorMessage.set(error instanceof Error ? error.message : 'Unable to stop recording');
     } finally {
       this.cleanupSession();
     }
@@ -217,11 +201,7 @@ export class RecordingSessionService {
   }
 
   private resolveSupportedMimeType(): string | null {
-    const candidates = [
-      'video/webm;codecs=vp9,opus',
-      'video/webm;codecs=vp8,opus',
-      'video/webm',
-    ];
+    const candidates = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
 
     for (const candidate of candidates) {
       if (MediaRecorder.isTypeSupported(candidate)) {

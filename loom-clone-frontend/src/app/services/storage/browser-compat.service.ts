@@ -9,9 +9,7 @@ import { Injectable, computed, signal } from '@angular/core';
 })
 export class BrowserCompatService {
   private readonly _isSupported = signal<boolean>(this.checkSupport());
-  private readonly _mediaDevicesSupported = signal<boolean>(
-    this.checkMediaDevicesSupport(),
-  );
+  private readonly _mediaDevicesSupported = signal<boolean>(this.checkMediaDevicesSupport());
   private readonly _browserName = signal<string>(this.detectBrowser());
 
   /**

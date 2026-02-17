@@ -39,9 +39,7 @@ export class MediaDevicesService {
   private readonly _microphoneEnabled = signal(true);
   private readonly _cameraEnabled = signal(false);
   private readonly _screenSharingEnabled = signal(true);
-  private readonly _activeMicrophoneTrack = signal<MediaStreamTrack | null>(
-    null,
-  );
+  private readonly _activeMicrophoneTrack = signal<MediaStreamTrack | null>(null);
   private readonly _activeCameraTrack = signal<MediaStreamTrack | null>(null);
 
   // ============ Public Readonly Signals ============
@@ -61,42 +59,27 @@ export class MediaDevicesService {
 
   readonly selectedCamera = computed(() => {
     const cameraKey = this._selectedCameraKey();
-    return (
-      this._availableCameras().find((cam) => cam.selectionKey === cameraKey) ||
-      null
-    );
+    return this._availableCameras().find((cam) => cam.selectionKey === cameraKey) || null;
   });
 
   readonly selectedMicrophone = computed(() => {
     const microphoneKey = this._selectedMicrophoneKey();
-    return (
-      this._availableMicrophones().find(
-        (mic) => mic.selectionKey === microphoneKey,
-      ) || null
-    );
+    return this._availableMicrophones().find((mic) => mic.selectionKey === microphoneKey) || null;
   });
 
-  readonly hasDevicePermission = computed(
-    () => this._permissionState() === 'granted',
-  );
+  readonly hasDevicePermission = computed(() => this._permissionState() === 'granted');
 
   readonly hasAnySelectedDevice = computed(
-    () =>
-      this._selectedCameraKey() !== null ||
-      this._selectedMicrophoneKey() !== null,
+    () => this._selectedCameraKey() !== null || this._selectedMicrophoneKey() !== null,
   );
 
   readonly needsDevicePermission = computed(
     () => this.hasAnySelectedDevice() && this._permissionState() !== 'granted',
   );
 
-  readonly canToggleMicrophoneLive = computed(
-    () => this._activeMicrophoneTrack() !== null,
-  );
+  readonly canToggleMicrophoneLive = computed(() => this._activeMicrophoneTrack() !== null);
 
-  readonly canToggleCameraLive = computed(
-    () => this._activeCameraTrack() !== null,
-  );
+  readonly canToggleCameraLive = computed(() => this._activeCameraTrack() !== null);
 
   readonly activeTracks = computed<ActiveRecordingTracks>(() => ({
     microphoneTrack: this._activeMicrophoneTrack(),
@@ -121,9 +104,7 @@ export class MediaDevicesService {
     try {
       // Check browser support
       if (!this.isSupported()) {
-        this._errorMessage.set(
-          'Media Devices API not supported in this browser',
-        );
+        this._errorMessage.set('Media Devices API not supported in this browser');
         this._permissionState.set('unknown');
         return;
       }
@@ -136,10 +117,7 @@ export class MediaDevicesService {
       ]);
     } catch (error) {
       console.error('[MediaDevicesService] Initialization failed:', error);
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Failed to initialize media devices';
+      const message = error instanceof Error ? error.message : 'Failed to initialize media devices';
       this._errorMessage.set(message);
     }
   }
@@ -186,8 +164,7 @@ export class MediaDevicesService {
       // Verify existing selections are still valid
       this.validateSelectedDevices();
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Failed to enumerate devices';
+      const message = error instanceof Error ? error.message : 'Failed to enumerate devices';
       console.error('[MediaDevicesService] Enumeration failed:', error);
       this._errorMessage.set(message);
     } finally {
@@ -353,16 +330,10 @@ export class MediaDevicesService {
       if (error instanceof DOMException && error.name === 'NotAllowedError') {
         this._permissionState.set('denied');
         this._errorMessage.set('Permission denied by user');
-      } else if (
-        error instanceof DOMException &&
-        error.name === 'NotFoundError'
-      ) {
+      } else if (error instanceof DOMException && error.name === 'NotFoundError') {
         this._errorMessage.set('One or more devices not found');
       } else {
-        const message =
-          error instanceof Error
-            ? error.message
-            : 'Failed to request permission';
+        const message = error instanceof Error ? error.message : 'Failed to request permission';
         this._errorMessage.set(message);
       }
     }
@@ -380,16 +351,9 @@ export class MediaDevicesService {
         lastUpdated: Date.now(),
       };
 
-      await this.indexedDB.set(
-        'preferences',
-        this.TOGGLE_PREFERENCES_KEY,
-        preferences,
-      );
+      await this.indexedDB.set('preferences', this.TOGGLE_PREFERENCES_KEY, preferences);
     } catch (error) {
-      console.error(
-        '[MediaDevicesService] Failed to save toggle preferences:',
-        error,
-      );
+      console.error('[MediaDevicesService] Failed to save toggle preferences:', error);
     }
   }
 
@@ -408,10 +372,7 @@ export class MediaDevicesService {
       // Use IndexedDB service to persist
       await this.indexedDB.set('deviceSelections', 'current', selection);
     } catch (error) {
-      console.error(
-        '[MediaDevicesService] Failed to save device selection:',
-        error,
-      );
+      console.error('[MediaDevicesService] Failed to save device selection:', error);
       // Don't show error to user; this is background persistence
     }
   }
@@ -434,25 +395,16 @@ export class MediaDevicesService {
 
         const cameraKey =
           selection.cameraSelectionKey ??
-          this.resolveLegacySelectionKey(
-            legacySelection.cameraDeviceId,
-            'videoinput',
-          );
+          this.resolveLegacySelectionKey(legacySelection.cameraDeviceId, 'videoinput');
         const microphoneKey =
           selection.microphoneSelectionKey ??
-          this.resolveLegacySelectionKey(
-            legacySelection.microphoneDeviceId,
-            'audioinput',
-          );
+          this.resolveLegacySelectionKey(legacySelection.microphoneDeviceId, 'audioinput');
 
         this._selectedCameraKey.set(cameraKey);
         this._selectedMicrophoneKey.set(microphoneKey);
       }
     } catch (error) {
-      console.error(
-        '[MediaDevicesService] Failed to load device selection:',
-        error,
-      );
+      console.error('[MediaDevicesService] Failed to load device selection:', error);
       // Silently fail; selection will be empty and user can choose again
     }
   }
@@ -468,35 +420,23 @@ export class MediaDevicesService {
       );
 
       if (preferences) {
-        const preferencesWithDefaults =
-          preferences as MediaTogglePreferences & {
-            screenSharingEnabled?: boolean;
-          };
+        const preferencesWithDefaults = preferences as MediaTogglePreferences & {
+          screenSharingEnabled?: boolean;
+        };
         this._microphoneEnabled.set(preferences.microphoneEnabled);
         this._cameraEnabled.set(preferences.cameraEnabled);
-        this._screenSharingEnabled.set(
-          preferencesWithDefaults.screenSharingEnabled ?? true,
-        );
+        this._screenSharingEnabled.set(preferencesWithDefaults.screenSharingEnabled ?? true);
       }
     } catch (error) {
-      console.error(
-        '[MediaDevicesService] Failed to load toggle preferences:',
-        error,
-      );
+      console.error('[MediaDevicesService] Failed to load toggle preferences:', error);
     }
   }
 
   /**
    * Check if a device is still available
    */
-  private isSelectionAvailable(
-    selectionKey: string,
-    kind: MediaDeviceKind,
-  ): boolean {
-    const devices =
-      kind === 'videoinput'
-        ? this._availableCameras()
-        : this._availableMicrophones();
+  private isSelectionAvailable(selectionKey: string, kind: MediaDeviceKind): boolean {
+    const devices = kind === 'videoinput' ? this._availableCameras() : this._availableMicrophones();
     return devices.some((device) => device.selectionKey === selectionKey);
   }
 
@@ -508,18 +448,12 @@ export class MediaDevicesService {
     const cameraKey = this._selectedCameraKey();
     const microphoneKey = this._selectedMicrophoneKey();
 
-    if (
-      cameraKey !== null &&
-      !this.isSelectionAvailable(cameraKey, 'videoinput')
-    ) {
+    if (cameraKey !== null && !this.isSelectionAvailable(cameraKey, 'videoinput')) {
       this._selectedCameraKey.set(null);
       this._cameraEnabled.set(false);
     }
 
-    if (
-      microphoneKey !== null &&
-      !this.isSelectionAvailable(microphoneKey, 'audioinput')
-    ) {
+    if (microphoneKey !== null && !this.isSelectionAvailable(microphoneKey, 'audioinput')) {
       this._selectedMicrophoneKey.set(null);
       this._microphoneEnabled.set(false);
     }
@@ -562,8 +496,7 @@ export class MediaDevicesService {
     }
 
     const normalizedGroupId = device.groupId.trim() || 'no-group';
-    const normalizedLabel =
-      device.label.trim().toLowerCase() || this.EMPTY_DEVICE_ID_SENTINEL;
+    const normalizedLabel = device.label.trim().toLowerCase() || this.EMPTY_DEVICE_ID_SENTINEL;
     return `${kind}:default:${normalizedGroupId}:${normalizedLabel}:${index}`;
   }
 
@@ -580,14 +513,8 @@ export class MediaDevicesService {
       return `${kind}:id:${normalizedDeviceId}`;
     }
 
-    const devices =
-      kind === 'videoinput'
-        ? this._availableCameras()
-        : this._availableMicrophones();
-    return (
-      devices.find((device) => device.deviceId.trim().length === 0)
-        ?.selectionKey ?? null
-    );
+    const devices = kind === 'videoinput' ? this._availableCameras() : this._availableMicrophones();
+    return devices.find((device) => device.deviceId.trim().length === 0)?.selectionKey ?? null;
   }
 
   /**
