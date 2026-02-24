@@ -153,7 +153,6 @@
                   class="form-select"
                   (change)="onSelectCamera($event)"
                   [value]="selectedCameraKey() || ''"
-                  aria-label="Select camera device"
                 >
                   <option value="" disabled>
                     {{
@@ -186,7 +185,6 @@
                   class="form-select"
                   (change)="onSelectMicrophone($event)"
                   [value]="selectedMicrophoneKey() || ''"
-                  aria-label="Select microphone device"
                 >
                   <option value="" disabled>
                     {{
@@ -220,7 +218,6 @@
                   type="button"
                   class="btn btn-primary devices-btn"
                   (click)="onGrantMediaPermission()"
-                  aria-label="Grant camera and microphone permissions"
                 >
                   Grant Camera & Microphone Access
                 </button>
