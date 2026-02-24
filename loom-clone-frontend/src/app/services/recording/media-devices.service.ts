@@ -26,6 +26,7 @@ export class MediaDevicesService {
   private readonly indexedDB = inject(IndexedDbService);
   private readonly TOGGLE_PREFERENCES_KEY = 'recording-toggle-defaults';
   private readonly EMPTY_DEVICE_ID_SENTINEL = '__EMPTY_DEVICE_ID__';
+  private hasInitialized = false;
 
   // ============ Private State Signals ============
 
@@ -92,13 +93,18 @@ export class MediaDevicesService {
       (this._cameraEnabled() && this._selectedCameraKey() !== null),
   );
 
-  constructor() {
-    this.initializeDevices();
+  async init(): Promise<void> {
+    if (this.hasInitialized) {
+      return;
+    }
+
+    this.hasInitialized = true;
+    await this.initializeDevices();
   }
 
   /**
    * Initialize device enumeration and restore previous selections
-   * Called on service instantiation
+   * Called through explicit service initialization
    */
   private async initializeDevices(): Promise<void> {
     try {

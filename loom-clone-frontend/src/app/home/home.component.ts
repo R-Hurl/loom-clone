@@ -118,6 +118,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   private activePlaybackObjectUrl: string | null = null;
 
   async ngOnInit(): Promise<void> {
+    await this.mediaDevices.init();
+
     // Auto-check for stored folder on component init
     await this.folderStorage.initializeFolder();
 
